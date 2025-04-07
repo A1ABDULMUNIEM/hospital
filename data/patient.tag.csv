@@ -1,0 +1,5 @@
+id,name,active
+patient_tags_ceo,CEO,True
+patient_tags_cfo,CFO,True
+patient_tags_vvp,VvP,False
+patient_tags_hr,HR,False

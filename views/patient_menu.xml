@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!--tree_view-->
+    <record id="patient_tree_view" model="ir.ui.view">
+        <field name="name">Patient_tree_view</field>
+        <field name="model">hospital.patient</field>
+        <field name="arch" type="xml">
+            <!-- export_xlsx="0" is used to disable the export to excel option-->
+            <tree export_xlsx="0">
+                <field name="name" string="Patient Name"/>
+                <field name="ref"/>
+                <field name="date_of_birth"/>
+                <field name="age"/>
+                <field name="gender"/>
+            </tree>
+        </field>
+
+    </record>
+    <!--form_view-->
+    <record id="patient_form_view" model="ir.ui.view">
+        <field name="name">patient_form_view</field>
+        <field name="model">hospital.patient</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <field name="image" widget="image" class="oe_avatar"/>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="ref" readonly="1"/>
+                        </h1>
+                        <h2>
+                            <!--the class does not work for some reason-->
+                            <label for="name" string="name" class="oe_edit_only"/>
+                            <field name="name"/>
+                        </h2>
+
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date_of_birth"/>
+                            <field name="age"/>
+                        </group>
+                        <group>
+                            <field name="gender" invisible="context.get('hide_gender')"/>
+                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="parent" attrs="{'invisible': ['|', ('age', '&lt;=', 18), ('gender', '=', 'male')]}"/>
+                            <field name="partner" attrs="{'invisible': [ ('age', '&lt;=', 19)]}"/>
+                            <field name="martial_status" attrs="{'required':[('martial_status', '!=', 'married')],
+                                                                 'readonly': [ ('martial_status', '=', 'married')]}"/>
+                        </group>
+
+                    </group>
+                </sheet>
+                <!-- Chatter -->
+
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                </div>
+
+            </form>
+        </field>
+    </record>
+    <!--search_view-->
+
+    <record id="patient_search_view" model="ir.ui.view">
+        <field name="name">Patient_search_view</field>
+        <field name="model">hospital.patient</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Patient Name" filter_domain="[('name', '=', 'Ahmad')]"/>
+                <field name="ref" filter_domain="[('ref', '=', '01')]"/>
+                <field name="age"/>
+                <field name="gender"/>
+                <filter name="filter_archive" string="Archived" domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter name="filter_only_males" string="Male" domain="[('gender', '=', 'male')]"/>
+                <!--you can also use the domain within python code for the same purposes which is filtering the records,
+                 which is done just by adding the attribute domain to the specific field-->
+                <filter name="filter_only_female" string="Female" domain="[('gender', '=', 'female')]"/>
+
+                <separator/>
+                    <filter name="filter_kids_only" string="Kids" domain="[('age', '&lt;=', '7')]"/>
+                <filter name="group_by_gender" string="Gender" context="{'group_by': 'gender'}"/>
+                <!--                <filter name="name" string="filter_Only_male" context="{'group_by': 'age'}"/>-->
+                <searchpanel>
+                    <field name="gender" string="Gender" icon="fa-users" select="multi" enable_counters="1"/>
+                </searchpanel>
+            </search>
+        </field>
+
+    </record>
+
+    <record id="patient_menu_action" model="ir.actions.act_window">
+        <field name="name">patients</field>
+        <field name="res_model">hospital.patient</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_filter_only_males':1}</field>
+        <!--        <field name="context">{'search_default_filter_only_males':1, 'search_default_group_by_gender':1}</field>-->
+        <!--        <field name="context">{'search_default_filter_kids_only':1}</field>-->
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add the first patient!!!
+            </p>
+        </field>
+    </record>
+    <menuitem
+            id="patient_menu"
+            name="Patients"
+            action="patient_menu_action"
+            parent="patient_menu_master"
+            sequence="0"
+    />
+</odoo>

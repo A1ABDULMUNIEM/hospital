@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="patient_tag_tree_view" model="ir.ui.view">
+        <field name="name">patient_tag_tree_view</field>
+        <field name="model">patient.tag</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="color" widget="color_picker"/>
+                <field name="color_two" widget="color" groups="base.group_no_one"/>
+                <field name="active"/>
+                <field name="sequence"/>
+            </tree>
+        </field>
+    </record>
+    <record id="patient_tag_form_view" model="ir.ui.view">
+        <field name="name">patient_tag_form_view</field>
+        <field name="model">patient.tag</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="sequence"/>
+                        <field name="color" widget="color_picker"/>
+                        <field name="color_two" widget="color" groups="base.group_no_one"/>
+                        <field name="active" widget="boolean_toggle"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="patient_tag_action" model="ir.actions.act_window">
+        <field name="name">patient_tag_action</field>
+        <field name="res_model">patient.tag</field>
+        <field name="view_mode">tree,form</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="context">{'search_default_filter_only_males':1}</field>
+    </record>
+    <menuitem id="tags_menu"
+              name="Patient Tags"
+              parent="patient_tags_main_menu"
+              sequence="0"
+              action="patient_tag_action"
+    />
+</odoo>

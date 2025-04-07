@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- activity view   -->
+    <record id="hospital_appointments_activity_view" model="ir.ui.view">
+        <field name="name">hospital_appointments_activity_view</field>
+        <field name="model">hospital.appointments</field>
+        <field name="arch" type="xml">
+            <activity string="Appointments">
+                <field name="patient_id"/>
+                <field name="ref"/>
+                <templates>
+                    <div t-name="activity-box">
+                        <img t-att-src="activity_image('hospital.patient', 'image', record.patient_id.raw_value)"
+                             t-att-title="record.patient_id.value" t-att-alt="record.patient_id.value"/>
+                        <div>
+                            <field name="ref" display="full"/>
+                        </div>
+                    </div>
+                </templates>
+            </activity>
+        </field>
+    </record>
+    <!--tree_view-->
+    <record id="appointments_tree_view" model="ir.ui.view">
+        <field name="name">appointments_tree_view</field>
+        <field name="model">hospital.appointments</field>
+        <field name="arch" type="xml">
+            <tree decoration-success="state == 'done'"
+                  decoration-info="state=='draft'"
+                  decoration-warning="state=='in_consultation'" sample="1" multi_edit="1">
+                <field name="patient_id"/>
+                <field name="gender"/>
+                <field name="appointment_time"/>
+                <field name="booking_date"/>
+                <field name="ref"/>
+<!--                many2one_avatar will display the avatar only and will not provide the chat feature-->
+                <field name="doctor_id" widget="many2one_avatar_user"/>
+                <field name="state" decoration-success="state == 'done'"
+                       decoration-info="state=='draft'"
+                       decoration-warning="state=='in_consultation'"
+                       decoration-danger="state=='cancel'"
+                       widget="badge"
+                />
+                <field name="activity_ids" widget="list_activity" optional="show"/>
+
+            </tree>
+        </field>
+
+    </record>
+    <!--form_view-->
+    <record id="appointments_form_view" model="ir.ui.view">
+        <field name="name">appointments_form_view</field>
+        <field name="model">hospital.appointments</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <header>
+                        <!--                            add the buttons to make the functions work-->
+                        <!--                        <field name="state" widget="statusbar"/>-->
+                        <!--                        options="{'clickable':'1'}" we use it if the status bar is dynamic otherwise we use functions-->
+                        <!--                        the states determine the button's visibility but to apply it there must be a sequence-->
+                        <button name="set_draft" type="object" string="Set to draft" states="cancel"/>
+                        <button name="set_in_consultation" type="object" string="set to in consultation" states="draft, done"/>
+                        <button name="set_done" type="object" string="Set to done" states="in_consultation, cancel"/>
+                        <button name="%(om_hospital.cancel_appointment_wizard_action)d" string="Cancel"
+                                type="action" class="btn-primary" data-hotkey="q" context="{'default_appointment_id': active_id, 'hide_appointment': 1}"/>
+<!--                        <button name="set_cancelled" type="object" string="Set to cancel" states="done, in_consultation, draft"/>-->
+                        <field name="state" widget="statusbar" statusbar_visible="done, draft, in_consultation"/>
+
+                    </header>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="priority" widget="priority" class="m-3"/>
+                        </h1>
+                    </div>
+                    <group>
+                    <!--groups="base.group_no_one" tells odoo that this button is only visible to users that have the group "base.group_no_one",
+                     which is the developer mode group-->
+                        <group>
+                            <field name="patient_id" default_focus="1"/>
+                            <field name="booking_date"/>
+                            <field name="hide_sales_price"/>
+                            <field name="gender"/>
+                            <button name="%(om_hospital.patient_menu_action)d" string="Action Button" type="action"
+                                    confirm="Are you sure that you want to open the patient action?"
+                                    help="This is a message!!!"
+                                    class="oe_highlight"
+                                    groups="base.group_no_one"/>
+                            <button name="set_done" string="Set to done" type="object"
+                                    confirm="Are you sure that you want to set this to done?"
+                                    help="This is a message!!!"
+                                    class="oe_highlight" data-hotkey="z"/>
+                            <button name="set_cancelled" string="Set to cancel" type="object"
+                                    confirm="Are you sure that you want to set this to cancelled?"
+                                    help="This is a message!!!"
+                                    class="oe_highlight"/>
+                        </group>
+                        <group>
+                            <field name="appointment_time"/>
+                            <field name="ref"/>
+                            <field name="doctor_id" widget="many2one_avatar_user"/>
+
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Prescription" name="Prescription">
+
+                            <field name="prescription" placeholder="Enter your prescription" options="{'collaborative': True, 'resizable': True, 'codeview': True}"/>
+
+                        </page>
+                        <page string="Pharmacy" name="Pharmacy">
+                                <field name="booking_date"/>
+                             <field name="line_ids">
+                                <tree editable="bottom">
+                                    <field name="products_id"/>
+                                    <field name="quantity"/>
+                                    <field name="price" attrs="{'column_invisible': [('parent.hide_sales_price', '=', True)]}"/>
+                                </tree>
+                                 <form>
+                                     <group>
+                                         <field name="products_id"/>
+                                         <field name="quantity"/>
+                                         <field name="price" attrs="{'column_invisible': [('parent.hide_sales_price', '=', True)]}"/>
+                                     </group>
+                                 </form>
+                            </field>
+
+                        </page>
+                    </notebook>
+                </sheet>
+
+            </form>
+        </field>
+    </record>
+    <!--search_view-->
+
+    <record id="appointments_search_view" model="ir.ui.view">
+        <field name="name">appointments_search_view</field>
+        <field name="model">hospital.appointments</field>
+        <field name="arch" type="xml">
+            <search>
+
+            </search>
+        </field>
+
+    </record>
+
+    <record id="appointments_menu_action" model="ir.actions.act_window">
+        <field name="name">Appointments</field>
+        <field name="res_model">hospital.appointments</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree,form,activity</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add the first appointments!!!
+            </p>
+        </field>
+    </record>
+    <menuitem
+            id="appointments_menu"
+            name="Appointments"
+            action="appointments_menu_action"
+            parent="appointments_main_menu"
+            sequence="0"
+    />
+
+</odoo>
