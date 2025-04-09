@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
-        <menuitem
+    <menuitem
             id="hospital_main_menu"
             name="Hospital"
             web_icon="om_hospital, static/description/icon_2.png"
@@ -12,7 +12,7 @@
               name="Patient Details"
               sequence="0"/>
 
-<menuitem
+    <menuitem
             id="appointments_main_menu"
             name="Appointments Menu"
             parent="hospital_main_menu"
@@ -30,6 +30,12 @@
             parent="appointments_main_menu"
             sequence="20"
             action="cancel_appointment_wizard_action"
+    />
+    <menuitem
+            id="configuration_main_menu"
+            name="Configuration"
+            parent="hospital_main_menu"
+            sequence="20"
     />
 
 

@@ -28,6 +28,9 @@
             <tree decoration-success="state == 'done'"
                   decoration-info="state=='draft'"
                   decoration-warning="state=='in_consultation'" sample="1" multi_edit="1">
+                <header>
+                    <button name="set_in_consultation" type="object" string="set to in consultation"/>
+                </header>
                 <field name="patient_id"/>
                 <field name="gender"/>
                 <field name="appointment_time"/>
@@ -42,7 +45,16 @@
                        widget="badge"
                 />
                 <field name="activity_ids" widget="list_activity" optional="show"/>
+                <button name="set_done" type="object" string="Set to done"
+                        class="fa fa-check btn-success" attrs="{'invisible': [('state', '!=', 'in_consultation')]}"/>
 
+                <button name="%(om_hospital.cancel_appointment_wizard_action)d" string="Cancel"
+                        type="action" class="fa fa-times btn-danger"
+                        context="{'default_appointment_id': active_id, 'hide_appointment': 1}"
+                        attrs="{'invisible': [('state', 'not in', ('draft','in_consultation'))]}"/>
+<!--                <groupby name="patient_id">not supported in odoo16 and it was only applicable on Many2one fields-->
+<!--                    <button name="action_some" string ='action' type="object"/>-->
+<!--                </groupby>-->
             </tree>
         </field>
 
@@ -59,12 +71,12 @@
                         <!--                        <field name="state" widget="statusbar"/>-->
                         <!--                        options="{'clickable':'1'}" we use it if the status bar is dynamic otherwise we use functions-->
                         <!--                        the states determine the button's visibility but to apply it there must be a sequence-->
-                        <button name="set_draft" type="object" string="Set to draft" states="cancel"/>
-                        <button name="set_in_consultation" type="object" string="set to in consultation" states="draft, done"/>
-                        <button name="set_done" type="object" string="Set to done" states="in_consultation, cancel"/>
+                        <button name="set_draft" type="object" string="Set to draft"  states="done,in_consultation"/>
+                        <button name="set_in_consultation" type="object" string="set to in consultation" states="draft"/>
+                        <button name="set_done" type="object" string="Set to done" states="in_consultation"/>
                         <button name="%(om_hospital.cancel_appointment_wizard_action)d" string="Cancel"
                                 type="action" class="btn-primary" data-hotkey="q" context="{'default_appointment_id': active_id, 'hide_appointment': 1}"/>
-<!--                        <button name="set_cancelled" type="object" string="Set to cancel" states="done, in_consultation, draft"/>-->
+<!--                        <button name="set_cancelled" type="object" string="Set to cancel"/>-->
                         <field name="state" widget="statusbar" statusbar_visible="done, draft, in_consultation"/>
 
                     </header>
@@ -77,8 +89,10 @@
                     <!--groups="base.group_no_one" tells odoo that this button is only visible to users that have the group "base.group_no_one",
                      which is the developer mode group-->
                         <group>
-                            <field name="patient_id" default_focus="1"/>
+                            <!--This widget (widget="selection") is only allowing the user to select from a dropdown menu without searching-->
+                            <field name="patient_id" default_focus="1" widget="selection"/>
                             <field name="booking_date"/>
+                            <field name="operations_id"/>
                             <field name="hide_sales_price"/>
                             <field name="gender"/>
                             <button name="%(om_hospital.patient_menu_action)d" string="Action Button" type="action"

@@ -18,6 +18,8 @@
         'views/female_patient_menu.xml',
         'views/appointments_menu.xml',
         'views/patient_tag_menu.xml',
+        'views/operations_view.xml',
+        'views/res_config_settings_views.xml',
     ],
     'demo': [],
     'application': True,

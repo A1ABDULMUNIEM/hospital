@@ -7,13 +7,14 @@ class HospitalAppointments(models.Model):
     _description = "Hospital Appointments"
     _rec_name = 'patient_id'
     #HERE THE REC NAME GIVE A DISPLAYED NAME FOR THE MODEL IN THE UI IF IT DOES NOT INCLUDE A NAME FIELD YOU CAN SPECIFY HOW YOU WOULD LIKE IT TO DISPLAY
-
+    _order = 'id desc'
+    # you can make it based on multiple fields like this _order = 'patient_id asc, id desc'
     patient_id = fields.Many2one('hospital.patient')
     # it takes the value using the dot notation from the related field patient_id the relational field.
     gender= fields.Selection(related='patient_id.gender')
     appointment_time= fields.Datetime(default=fields.Datetime.now)
     booking_date= fields.Date(default=fields.Date.context_today)
-    ref = fields.Char(string="Reference", tracking=True)
+    ref = fields.Char(string="Reference", tracking=True, readonly=1, force_save=1)
     prescription = fields.Html(string='Prescription')
     priority = fields.Selection([
         ('0', 'Normal'),
@@ -30,6 +31,7 @@ class HospitalAppointments(models.Model):
     doctor_id= fields.Many2one('res.users', string='Doctor')
     line_ids = fields.One2many('pharmacy.line', 'patient_id', string='Appointment Lines')
     hide_sales_price=fields.Boolean(string='Hide Sales Price')
+    operations_id = fields.Many2one('operations')
     @api.onchange('patient_id')
     def _onchange_patient_id(self):
         self.ref = self.patient_id.ref
@@ -40,8 +42,8 @@ class HospitalAppointments(models.Model):
 
     def set_in_consultation(self):
         for rec in self:
-            rec.state = 'in_consultation'
-
+            if rec.state == 'draft':
+                rec.state = 'in_consultation'
     def set_done(self):
         for rec in self:
            rec.state = 'done'
@@ -64,7 +66,12 @@ class HospitalAppointments(models.Model):
     #     }
     def set_cancelled(self):
         action = self.env.ref('om_hospital.cancel_appointment_wizard_action').read()[0]
+
         return action
+
+    def action_some(self):
+        print("test")
+        return
 
 class PharmacyLine(models.Model):
     _name = "pharmacy.line"

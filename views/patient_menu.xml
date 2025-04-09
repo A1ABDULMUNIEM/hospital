@@ -10,8 +10,9 @@
                 <field name="name" string="Patient Name"/>
                 <field name="ref"/>
                 <field name="date_of_birth"/>
-                <field name="age"/>
+                <field name="age" avg="Average Age"/>
                 <field name="gender"/>
+                <field name="appointment_count" sum="Total Appointments"/>
             </tree>
         </field>
 
@@ -42,8 +43,9 @@
                             <field name="age"/>
                         </group>
                         <group>
-                            <field name="gender" invisible="context.get('hide_gender')"/>
-                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                            <field name="gender" invisible="context.get('hide_gender')" widget="radio"/>
+                            <!--Here we can add many2many_checkboxes instead of many2many_tags-->
+                            <field name="tag_ids" widget="many2many_checkboxes" options="{'color_field': 'color'}"/>
                             <field name="active" invisible="1"/>
                         </group>
                         <group>

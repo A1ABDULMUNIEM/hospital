@@ -1,4 +1,7 @@
 from datetime import date
+from re import search
+
+from dateutil.relativedelta import relativedelta
 from odoo import fields, api, models
 from odoo.exceptions import ValidationError
 
@@ -10,7 +13,7 @@ class HospitalPatient(models.Model):
     name = fields.Char(string="Name", tracking=True)
     date_of_birth= fields.Date()
     ref = fields.Char(string="Reference", tracking=True, help="the patients reference number.")
-    age = fields.Integer(string="Age", tracking=True, compute='_compute_age', store=1)
+    age = fields.Integer(string="Age", tracking=True, compute='_compute_age', inverse='_inverse_compute_age', search='_search_age', store=1)
     gender = fields.Selection([("male", "Male"), ("female", "Female")], string="Gender", tracking=True)
     active = fields.Boolean(string="Active", default=True)
     image= fields.Image(string="Image")
@@ -21,6 +24,13 @@ class HospitalPatient(models.Model):
     martial_status= fields.Selection([("single", "Single"), ("married", "Married"), ("divorced", "Divorced")], string="Martial Status")
     partner= fields.Char(string="Partner")
 
+
+    @api.ondelete(at_uninstall=False)
+    def check_appointments(self):
+        for rec in self:
+            if rec.appointment_ids:
+                raise ValidationError("You can not delete a patient that has appointments")
+
     @api.depends('appointment_ids')
     def _compute_appointment_count(self):
         for rec in self:
@@ -28,7 +38,7 @@ class HospitalPatient(models.Model):
     @api.constrains('date_of_birth')
     def check_date_of_birth(self):
         for rec in self:
-            if rec.date_of_birth and rec.date_of_birth < fields.date.today():
+            if rec.date_of_birth and rec.date_of_birth > fields.date.today():
                 raise ValidationError("The date of birth can not be in the past")
     @api.model
     def create(self, vals):
@@ -52,5 +62,18 @@ class HospitalPatient(models.Model):
                 rec.age= today.year - rec.date_of_birth.year
             else:
                 rec.age=0
+    def _inverse_compute_age(self):
+        today = date.today()
+        for rec in self:
+            if rec.age:
+                rec.date_of_birth = today - relativedelta(years=rec.age)
+            else:
+                rec.date_of_birth = None
+    def _search_age(self, operator, value):
+        date_of_birth =  date.today() - relativedelta(years=value)
+        start_date = date_of_birth.replace(day=1, month=1)
+        end_date = date_of_birth.replace(day=31, month=12)
+        return [('date_of_birth', '>=', start_date), ('date_of_birth', '<=', end_date)]
+
     def name_get(self):
         return [(record.id, "[%s] %s" % (record.ref, record.name)) for record in self]
